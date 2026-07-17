@@ -39,12 +39,12 @@
 
         <!-- Paused Overlay -->
         <div v-if="isPaused" class="paused-overlay">
-          <p>Paused</p>
+          <p>PAUSED !</p>
           <p>
             Click
             <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14">
               <path fill="blue" d="M8 5v14l11-7z" />
-            </svg>
+            </svg> or press Esc
             to Continue!
           </p>
         </div>
@@ -93,15 +93,28 @@ export default {
       gridSize: 15,
     };
   },
+  
   methods: {
     snapToGrid(value) {
       return Math.floor(value / this.gridSize) * this.gridSize;
     },
+
+    
+
+    // Spawn makanan secara acak
     getRandomFoodPosition() {
-      return {
-        x: this.snapToGrid(Math.random() * 600),
-        y: this.snapToGrid(Math.random() * 600),
-      };
+      let pos;
+      let valid = false;
+      while (!valid) {
+        pos = {
+          x: this.snapToGrid(Math.random() * 600),
+          y: this.snapToGrid(Math.random() * 600),
+        };
+        valid = !this.snake.some(
+          part => part.x == pos.x && part.y == pos.y
+        );
+      }
+      return pos;
     },
     playEatSound() {
       if (this.eatSound) {
@@ -135,7 +148,11 @@ export default {
       this.gameStarted = true;
       this.isGameOver = false;
       this.isWin = false;
-      this.snake = [{ x: this.snapToGrid(75), y: this.snapToGrid(75) }];
+      this.snake = [
+        { x: this.snapToGrid(75), y: this.snapToGrid(75) },
+        { x: this.snapToGrid(65), y: this.snapToGrid(75) },
+        { x: this.snapToGrid(55), y: this.snapToGrid(75) },
+      ];
       this.direction = "right";
       this.score = 0;
       this.respawnAllFoods();
@@ -143,7 +160,11 @@ export default {
       window.addEventListener("keydown", this.handleKey);
     },
     restartGame() {
-      this.snake = [{ x: this.snapToGrid(75), y: this.snapToGrid(75) }];
+      this.snake = [
+        { x: this.snapToGrid(75), y: this.snapToGrid(75) },
+        { x: this.snapToGrid(65), y: this.snapToGrid(75) },
+        { x: this.snapToGrid(55), y: this.snapToGrid(75) },
+      ];
       this.direction = "right";
       this.score = 0;
       this.isPaused = false;
@@ -163,6 +184,13 @@ export default {
       }
     },
     handleKey(e) {
+      if (e.key === "Escape") {
+        this.togglePause();
+        return;
+      }
+
+      if (this.isPaused) return;
+
       const keyMap = {
         ArrowUp: "up",
         ArrowDown: "down",
@@ -288,21 +316,35 @@ export default {
         this.deathSound.play();
       }
     },
+
+    // peluang munculnya makanan spesial, super, racun, dan instant win
     spawnSpecialFood() {
       this.specialFood =
-        Math.random() < 0.4 ? this.getRandomFoodPosition() : null;
-    },
+        Math.random() < 0.15 ? this.getRandomFoodPosition() : null;
+    }, // Warna Ungu
+
     spawnSuperFood() {
       this.superFood =
-        Math.random() < 0.15 ? this.getRandomFoodPosition() : null;
-    },
+        Math.random() < 0.05 ? this.getRandomFoodPosition() : null;
+    }, // Warna Oren
+
     spawnPoisonFood() {
-      this.poisonFood =
-        Math.random() < 0.6 ? this.getRandomFoodPosition() : null;
-    },
+      clearTimeout(this.poisonTimeout);
+
+      this.poisonFood = this.getRandomFoodPosition();
+      
+      this.poisonTimeout = setTimeout(() => {
+        this.poisonFood = null;
+
+      this.poisonTimeout = setTimeout(() => {
+      this.spawnPoisonFood();
+    }, 3000) // Waktu muncul racun berikutnya setelah 3 detik;
+    }, 5000);
+  },
+
     spawnInstantWinFood() {
       this.instantWinFood =
-        Math.random() < 0.01 ? this.getRandomFoodPosition() : null;
+        Math.random() < 0.0001 ? this.getRandomFoodPosition() : null;
     },
   },
   mounted() {
@@ -391,13 +433,17 @@ export default {
 
 .start-button {
   font-family: "Press Start 2P", cursive;
-  background-color: #6c91f5;
+  background-color: #275ef7;
   color: white;
   padding: 12px 20px;
   border: none;
   border-radius: 6px;
   font-size: 12px;
   cursor: pointer;
+}
+
+.start-button:hover {
+  background-color: #1a4ed8;
 }
 
 .gameplay {
@@ -440,7 +486,7 @@ export default {
 
 .pause-button {
   font-size: 24px;
-  background-color: blue;
+  background-color: rgb(0, 0, 218);
   color: white;
   border: none;
   border-radius: 50%;
@@ -448,6 +494,10 @@ export default {
   cursor: pointer;
   width: 50px;
   height: 50px;
+}
+
+.pause-button:hover {
+  background-color: darkblue;
 }
 
 .paused-overlay {
@@ -501,6 +551,10 @@ export default {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.restart-button:hover {
+  background-color: rgb(4, 184, 4);
 }
 
 .special-food {

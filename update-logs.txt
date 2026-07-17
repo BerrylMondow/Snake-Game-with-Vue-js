@@ -1,0 +1,17 @@
+UPDATE V1.1
+
+What's New ?
+1. First Release on Github!
+
+
+UPDATE V1.2
+
+What's New ?
+1. Adjustment.
+    1.1. Poison food now spawns in 5 seconds, disappears for 3 seconds, 
+         and then spawns again at a random location.
+    
+    1.2. Adjusting the snake's body when player starts the game, from 1 block to 3 blocks.
+
+2. Bug Fixing.
+    2.1. Now the foods are no longer spawning under the snake's body.
